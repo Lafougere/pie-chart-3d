@@ -1,34 +1,63 @@
 {
-  "name": "pie-3d",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
-  },
-  "dependencies": {
-    "@tweenjs/tween.js": "^25.0.0",
-    "lit": "^3.3.1",
-    "three": "^0.182.0"
-  },
-  "devDependencies": {
-    "@types/three": "^0.182.0",
-    "prettier": "^3.7.4",
-    "typescript": "~5.9.3",
-    "vite": "^7.2.4",
-    "storybook": "^10.1.11",
-    "@storybook/web-components-vite": "^10.1.11",
-    "@chromatic-com/storybook": "^5.0.0",
-    "@storybook/addon-vitest": "^10.1.11",
-    "@storybook/addon-a11y": "^10.1.11",
-    "@storybook/addon-docs": "^10.1.11",
-    "vitest": "^4.0.17",
-    "playwright": "^1.57.0",
-    "@vitest/browser-playwright": "^4.0.17",
-    "@vitest/coverage-v8": "^4.0.17"
-  }
+	"name": "@lafougere/pie-chart-3d",
+	"description": "A 3D pie chart web component",
+	"author": "Axel Glorieux",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Lafougere/pie-chart-3d.git"
+	},
+	"keywords": [
+		"pie",
+		"chart",
+		"donut",
+		"3D",
+		"three.js",
+		"webcomponent",
+		"lit"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"private": false,
+	"license": "BSD-3-Clause",
+	"version": "1.0.0",
+	"type": "module",
+	"module": "./dist/pie-chart-3d.js",
+	"types": "./dist/pie-chart-3d.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/pie-chart-3d.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build"
+	},
+	"dependencies": {
+		"@tweenjs/tween.js": "^25.0.0",
+		"lit": "^3.3.1",
+		"three": "^0.182.0"
+	},
+	"devDependencies": {
+		"@types/three": "^0.182.0",
+		"prettier": "^3.7.4",
+		"typescript": "~5.9.3",
+		"vite": "^7.2.4",
+		"storybook": "^10.1.11",
+		"@storybook/web-components-vite": "^10.1.11",
+		"@chromatic-com/storybook": "^5.0.0",
+		"@storybook/addon-vitest": "^10.1.11",
+		"@storybook/addon-a11y": "^10.1.11",
+		"@storybook/addon-docs": "^10.1.11",
+		"vitest": "^4.0.17",
+		"playwright": "^1.57.0",
+		"@vitest/browser-playwright": "^4.0.17",
+		"@vitest/coverage-v8": "^4.0.17"
+	}
 }

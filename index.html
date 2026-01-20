@@ -8,7 +8,7 @@
 		<link rel="stylesheet" href="./src/index.css" />
 		<script type="module">
 			import { html, render } from 'lit'
-			import './src/pie-3d.js'
+			import './src/pie-chart-3d.js'
 			const COLORS = {
 				red: 0xf44336,
 				blue: 0x2196f3,
@@ -96,9 +96,9 @@
 				document.querySelector('pie-3d').colors = Object.values(COLORS2)
 			}, 3000)
 			render(
-				html`<pie-3d .slices="${slices}" width="320" height="240" animationDuration="1500">
+				html`<pie-chart-3d .slices="${slices}" width="320" height="240" animationDuration="1500">
 					<h1>Vite + Lit</h1>
-				</pie-3d>`,
+				</pie-chart-3d>`,
 				document.getElementById('demo'),
 			)
 		</script>
