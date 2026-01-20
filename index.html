@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>pie-3d</title>
+		<link rel="stylesheet" href="./src/index.css" />
+		<script type="module">
+			import { html, render } from 'lit'
+			import './src/pie-3d.js'
+			const COLORS = {
+				red: 0xf44336,
+				blue: 0x2196f3,
+				orange: 0xff9800,
+				green: 0x4caf50,
+				yellow: 0xffeb3b,
+				pink: 0xe91e63,
+				lightblue: 0x03a9f4,
+				purple: 0x9c27b0,
+				amber: 0xffc107,
+				lightgreen: 0x8bc34a,
+				indigo: 0x7986cb,
+				cyan: 0x00bcd4,
+				teal: 0x009688,
+				brown: 0x8d6e63,
+				bluegrey: 0x607d8b,
+				deeppurple: 0x9575cd,
+			}
+			const COLORS2 = {
+				blue: 0x2196f3,
+				yellow: 0xffeb3b,
+				orange: 0xff9800,
+				pink: 0xe91e63,
+				green: 0x4caf50,
+				red: 0xf44336,
+				lightblue: 0x03a9f4,
+				amber: 0xffc107,
+				purple: 0x9c27b0,
+				lighgreen: 0x8bc34a,
+				brown: 0x795548,
+				teal: 0x009688,
+				indigo: 0x3f51b5,
+				cyan: 0x00bcd4,
+				bluegrey: 0x607d8b,
+				deeppurple: 0x673ab7,
+			}
+			const slices1 = {
+				Belgium: 25,
+				UK: 5,
+				Germany: 3,
+				France: 35,
+				Luxemburg: 10,
+				'The Netherlands': 30,
+				Hungary: 7,
+				Denmark: 1,
+				Italy: 12,
+				Spain: 15,
+				Portugal: 8,
+			}
+			const slices2 = {
+				Belgium: 25,
+				UK: 5,
+				Germany: 3,
+				France: 35,
+				Luxemburg: 10,
+			}
+			const slices3 = {
+				Belgium: 56,
+				UK: 5,
+				Germany: 13,
+				France: 22,
+				Luxemburg: 14,
+				'The Netherlands': 32,
+				Hungary: 9,
+				Denmark: 1,
+				Italy: 14,
+				Spain: 15,
+				Portugal: 41,
+				Switzerland: 11,
+				Austria: 32,
+				Sweden: 11,
+				Norway: 14,
+				Finland: 3,
+			}
+			let slices = slices1
+			setTimeout(() => {
+				document.querySelector('pie-3d').slices = slices3
+				document.querySelector('pie-3d').innerWidth = 3
+				document.querySelector('pie-3d').colors = Object.values(COLORS)
+			}, 9000)
+			setTimeout(() => {
+				document.querySelector('pie-3d').innerWidth = 0
+			}, 6000)
+			setTimeout(() => {
+				document.querySelector('pie-3d').colors = Object.values(COLORS2)
+			}, 3000)
+			render(
+				html`<pie-3d .slices="${slices}" width="320" height="240" animationDuration="1500">
+					<h1>Vite + Lit</h1>
+				</pie-3d>`,
+				document.getElementById('demo'),
+			)
+		</script>
+	</head>
+	<body>
+		<div id="demo"></div>
+	</body>
+</html>
