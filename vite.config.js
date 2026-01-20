@@ -5,20 +5,35 @@ import { fileURLToPath } from 'node:url'
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import { playwright } from '@vitest/browser-playwright'
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
+import dts from 'vite-plugin-dts'
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
+	plugins: [
+		// dts({
+		// 	insertTypesEntry: true,
+		// }),
+	],
 	build: {
+		// lib: {
+		// 	entry: 'src/pie-3d.ts',
+		// 	formats: ['es'],
+		// },
+		outDir: './docs',
 		rollupOptions: {
-			output: {
-				manualChunks: {
-					'three-addons': ['three/addons'],
-					// 'three-examples': ['three/examples/jsm'],
-					three: ['three'],
-					tweenjs: ['@tweenjs/tween.js'],
-					lit: ['lit'],
-				},
-			},
+			// treeshake: {
+			// 	moduleSideEffects: false,
+			// },
+			// treeshake: 'smallest',
+			// output: {
+			// 	manualChunks: {
+			// 		// 'three-addons': ['three/addons'],
+			// 		// // 'three-examples': ['three/examples/jsm'],
+			// 		// three: ['three'],
+			// 		// tweenjs: ['@tweenjs/tween.js'],
+			// 		// lit: ['lit'],
+			// 	},
+			// },
 		},
 	},
 	test: {

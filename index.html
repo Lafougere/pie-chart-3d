@@ -6,6 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>pie-3d</title>
 		<link rel="stylesheet" href="./src/index.css" />
+
 		<script type="module">
 			import { html, render } from 'lit'
 			import './src/pie-3d.js'
@@ -90,15 +91,25 @@
 				document.querySelector('pie-3d').colors = Object.values(COLORS)
 			}, 9000)
 			setTimeout(() => {
+				// const container = document.querySelector('pie-3d').parentElement
+				// container.style.width = '640px'
+				// container.style.height = '480px'
+				document.querySelector('pie-3d').width = 640
+				document.querySelector('pie-3d').height = 480
+				// document.querySelector('pie-3d').lightIntensity = 1.0
+			}, 6000)
+			setTimeout(() => {
 				document.querySelector('pie-3d').innerWidth = 0
 			}, 6000)
 			setTimeout(() => {
 				document.querySelector('pie-3d').colors = Object.values(COLORS2)
 			}, 3000)
 			render(
-				html`<pie-3d .slices="${slices}" width="320" height="240" animationDuration="1500">
-					<h1>Vite + Lit</h1>
-				</pie-3d>`,
+				html` <div style="width:1024px;height:768px">
+					<pie-3d .slices="${slices}" animationDuration="1500">
+						<h1>Vite + Lit</h1>
+					</pie-3d>
+				</div>`,
 				document.getElementById('demo'),
 			)
 		</script>
