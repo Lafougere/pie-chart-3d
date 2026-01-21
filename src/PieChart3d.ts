@@ -208,12 +208,10 @@ export class PieChart3d extends LitElement {
 		scene.add(new AmbientLight(0xffffff, this.ambientLightIntensity))
 		scene.add(light)
 		this.resizeObserver.observe(this)
-		console.log('first updated')
 	}
 
 	private onResize() {
 		let { width, height } = this
-		console.log('onresize')
 		if (!width || !height) {
 			const rect = this.getBoundingClientRect()
 			if (!width) width = rect.width
@@ -366,13 +364,19 @@ export class PieChart3d extends LitElement {
 			if (this.hidePercents) {
 				slices.forEach((slice) => slice.hidePercent())
 			} else {
-				console.log('showing percents', slices.length)
 				slices.forEach((slice) => slice.showPercent())
 			}
 		}
 		if (_changedProperties.has('width') || _changedProperties.has('height')) {
 			if (!this.width || !this.height) return
-			this.resizeTween.to({ actualWidth: this.width, actualHeight: this.height }, this.animationDuration).start()
+			if (this.initialAnimation) {
+				setTimeout(() => {
+					this.actualHeight = this.height
+					this.actualWidth = this.width
+				})
+			} else {
+				this.resizeTween.to({ actualWidth: this.width, actualHeight: this.height }, this.animationDuration).start()
+			}
 		}
 		if (_changedProperties.has('actualWidth') || _changedProperties.has('actualHeight')) {
 			this.updateSize()
@@ -432,6 +436,7 @@ export class PieChart3d extends LitElement {
 	}
 
 	private renderScene() {
+		if (!this.actualWidth || !this.actualHeight) return
 		const { raycaster, intersected, pointer, camera, invisibleSlices, scene } = this
 		const { selectedObjects } = this.outlinePass
 		raycaster.setFromCamera(pointer, camera)

@@ -91,6 +91,8 @@
 			}, 9000)
 			setTimeout(() => {
 				document.querySelector('pie-chart-3d').innerWidth = 0
+				document.querySelector('pie-chart-3d').width = 800
+				document.querySelector('pie-chart-3d').height = 600
 			}, 6000)
 			setTimeout(() => {
 				document.querySelector('pie-chart-3d').colors = Object.values(COLORS2)
@@ -104,6 +106,6 @@
 		</script>
 	</head>
 	<body>
-		<div id="demo"></div>
+		<div id="demo" style="width: 1280px; height: 960px"></div>
 	</body>
 </html>

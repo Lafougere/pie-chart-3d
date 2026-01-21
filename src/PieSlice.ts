@@ -65,6 +65,15 @@ export class PieSlice extends Object3D {
 		return this._labelMargin
 	}
 
+	public set percentMargin(value: number) {
+		if (this.percentMargin !== value) this.needsUpdate = true
+		this._percentMargin = value
+	}
+
+	public get percentMargin() {
+		return this._percentMargin
+	}
+
 	public set needsUpdate(value: boolean) {
 		if (this._timeout) clearTimeout(this._timeout)
 		this._timeout = setTimeout(() => this.update())
@@ -101,9 +110,13 @@ export class PieSlice extends Object3D {
 
 	private percentDiv = document.createElement('div')
 
+	private percentSpan = document.createElement('span')
+
 	private percentIndicator = new CSS2DObject(this.percentDiv)
 
 	public material: MeshBasicMaterial | MeshLambertMaterial
+
+	public _percentMargin = 0
 
 	constructor(color: number, materialType: 'basic' | 'lambert' = 'lambert') {
 		super()
@@ -126,7 +139,7 @@ export class PieSlice extends Object3D {
 	}
 
 	public setPercentText(txt: string) {
-		this.percentDiv.innerHTML = txt
+		this.percentSpan.innerHTML = txt
 	}
 
 	public hideLabel() {
@@ -138,11 +151,11 @@ export class PieSlice extends Object3D {
 	}
 
 	public hidePercent() {
-		this.percentDiv.querySelector('span')!.style.display = 'none'
+		this.percentSpan.style.display = 'none'
 	}
 
 	public showPercent() {
-		this.percentDiv.querySelector('span')!.style.display = 'block'
+		this.percentSpan.style.display = 'block'
 	}
 
 	private setupLabel(color: number) {
@@ -157,9 +170,10 @@ export class PieSlice extends Object3D {
 	}
 
 	private setupPercentIndicator() {
-		const { percentDiv, percentIndicator, mesh } = this
+		const { percentDiv, percentSpan, percentIndicator, mesh } = this
 		percentDiv.className = 'pct'
 		percentDiv.style.backgroundColor = 'transparent'
+		percentDiv.appendChild(percentSpan)
 		percentIndicator.center.set(0, 1)
 		percentIndicator.layers.set(0)
 		mesh.add(percentIndicator)
@@ -223,7 +237,7 @@ export class PieSlice extends Object3D {
 	private getPercentPoint(): { x: number; y: number } {
 		const pctPath = new Path()
 		const dist = this.innerWidth === 0 ? this.outerWidth * 0.65 : this.innerWidth + (this.outerWidth - this.innerWidth) / 2
-		pctPath.absarc(0, 0, dist, 0, this.sizeInRadians / 2, false)
+		pctPath.absarc(0, 0, dist + this.percentMargin, 0, this.sizeInRadians / 2, false)
 		return pctPath.getPoints(2).pop() as { x: number; y: number }
 	}
 }
