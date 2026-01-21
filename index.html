@@ -85,18 +85,18 @@
 			}
 			let slices = slices1
 			setTimeout(() => {
-				document.querySelector('pie-3d').slices = slices3
-				document.querySelector('pie-3d').innerWidth = 3
-				document.querySelector('pie-3d').colors = Object.values(COLORS)
+				document.querySelector('pie-chart-3d').slices = slices3
+				document.querySelector('pie-chart-3d').innerWidth = 3
+				document.querySelector('pie-chart-3d').colors = Object.values(COLORS)
 			}, 9000)
 			setTimeout(() => {
-				document.querySelector('pie-3d').innerWidth = 0
+				document.querySelector('pie-chart-3d').innerWidth = 0
 			}, 6000)
 			setTimeout(() => {
-				document.querySelector('pie-3d').colors = Object.values(COLORS2)
+				document.querySelector('pie-chart-3d').colors = Object.values(COLORS2)
 			}, 3000)
 			render(
-				html`<pie-chart-3d .slices="${slices}" width="320" height="240" animationDuration="1500">
+				html`<pie-chart-3d .slices="${slices}" width="640" height="480" animationDuration="1500">
 					<h1>Vite + Lit</h1>
 				</pie-chart-3d>`,
 				document.getElementById('demo'),
