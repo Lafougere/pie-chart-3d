@@ -20,7 +20,7 @@
 	},
 	"private": false,
 	"license": "BSD-3-Clause",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"type": "module",
 	"module": "./dist/pie-chart-3d.js",
 	"types": "./dist/pie-chart-3d.d.ts",
