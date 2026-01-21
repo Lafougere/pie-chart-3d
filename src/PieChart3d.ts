@@ -337,7 +337,7 @@ export class PieChart3d extends LitElement {
 
 	protected updated(_changedProperties: PropertyValues): void {
 		if (_changedProperties.has('slices') || _changedProperties.has('outerWidth') || _changedProperties.has('innerWidth') || _changedProperties.has('thickness')) {
-			if (this.slices && Object.keys(this.slices.length)) this.setupSlices()
+			if (this.slices && Object.keys(this.slices).length) this.setupSlices()
 		}
 		if (_changedProperties.has('colors')) {
 			this.updateColors()
