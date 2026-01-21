@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-param-reassign */
 import { html, css, LitElement, type PropertyValues } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
 import { AmbientLight, Color, DirectionalLight, NeutralToneMapping, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, WebGLRenderer } from 'three'
 
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js'
@@ -63,6 +63,8 @@ export class PieChart3d extends LitElement {
 			display: inline-block;
 			position: relative;
 			color: currentColor;
+			width: 100%;
+			height: 100%;
 		}
 		#main {
 			width: 100%;
@@ -80,6 +82,7 @@ export class PieChart3d extends LitElement {
 			font-size: var(--pie-3d-pct-font-size, 0.8em);
 			color: #eee;
 			text-shadow: 1px 1px 0px #111;
+			line-height: 1.1;
 		}
 		.label span {
 			position: absolute;
@@ -88,6 +91,7 @@ export class PieChart3d extends LitElement {
 			text-align: center;
 			border-bottom: 2px solid transparent;
 			display: none;
+			line-height: 1.1;
 		}
 	`
 
@@ -107,15 +111,15 @@ export class PieChart3d extends LitElement {
 
 	@property({ type: Number }) public outlineColor = 0xffffff
 
-	@property({ type: Number }) public width = 800
+	@property({ type: Number }) public width = 0
 
-	@property({ type: Number }) public height = 600
+	@property({ type: Number }) public height = 0
 
-	@property({ type: Number }) public lightIntensity = 1.5
+	@property({ type: Number }) public lightIntensity = 1.0
 
-	@property({ type: Number }) public ambientLightIntensity = 0.5
+	@property({ type: Number }) public ambientLightIntensity = 0.4
 
-	@property({ type: Number }) public toneMappingExposure = 1.2
+	@property({ type: Number }) public toneMappingExposure = 1.5
 
 	@property({ type: Number }) public animationDuration = 1500
 
@@ -129,7 +133,7 @@ export class PieChart3d extends LitElement {
 
 	private scene = new Scene()
 
-	private camera: PerspectiveCamera = new PerspectiveCamera(30, this.width / this.height, 1, 100)
+	private camera = new PerspectiveCamera(30, this.width / this.height, 1, 100)
 
 	private sliceContainer = new Object3D()
 
@@ -139,7 +143,7 @@ export class PieChart3d extends LitElement {
 
 	private intersected: any = null
 
-	private invisibleSlices: Object3D[] = []
+	private invisibleSlices: any[] = []
 
 	private labelRenderer = new CSS2DRenderer()
 
@@ -147,31 +151,39 @@ export class PieChart3d extends LitElement {
 
 	private outlinePass = new OutlinePass(new Vector2(this.width, this.height), this.scene, this.camera)
 
+	private shaderPass = new ShaderPass(FXAAShader)
+
 	public light = new DirectionalLight(0xffffff, this.lightIntensity)
+
+	private resizeObserver = new ResizeObserver(this.onResize.bind(this))
 
 	private initialAnimation = true
 
+	@state() private actualWidth = 0
+
+	@state() private actualHeight = 0
+
+	private resizeTween = new Tween(this).easing(EASE_INOUT)
+
+	private lightTween = new Tween(this.light).easing(EASE_INOUT)
+
 	firstUpdated(): void {
-		const { width, height, renderer, labelRenderer, composer, camera, outlinePass, scene, sliceContainer, outlineColor } = this
+		const { renderer, labelRenderer, composer, camera, outlinePass, scene, sliceContainer, outlineColor, light } = this
 		const { devicePixelRatio } = window
 		const container = this.shadowRoot!.querySelector('#main') as HTMLDivElement
-		const effectFXAA = new ShaderPass(FXAAShader)
 
 		container.appendChild(renderer.domElement)
 		container.appendChild(labelRenderer.domElement)
 		container.addEventListener('mousemove', this.onPointerMove.bind(this))
 		container.addEventListener('click', this.onPointerClick.bind(this))
 
-		effectFXAA.uniforms.resolution.value.set((1 / width) * devicePixelRatio, (1 / height) * devicePixelRatio)
-		this.light.position.set(-10, 10, 10)
+		light.position.set(-10, 10, 10)
 
-		renderer.setSize(width, height)
 		renderer.toneMapping = NeutralToneMapping
 		renderer.toneMappingExposure = this.toneMappingExposure
 		renderer.setPixelRatio(devicePixelRatio)
 		renderer.setAnimationLoop(this._animate.bind(this))
 
-		labelRenderer.setSize(width, height)
 		labelRenderer.domElement.style.position = 'absolute'
 		labelRenderer.domElement.style.top = '0px'
 
@@ -184,19 +196,46 @@ export class PieChart3d extends LitElement {
 		outlinePass.visibleEdgeColor.set(outlineColor)
 		outlinePass.hiddenEdgeColor.set(outlineColor)
 
-		composer.setSize(width, height)
 		composer.setPixelRatio(devicePixelRatio)
 		composer.addPass(new RenderPass(scene, camera))
 		composer.addPass(outlinePass)
 		composer.addPass(new OutputPass())
-		composer.addPass(effectFXAA)
+		composer.addPass(this.shaderPass)
 
 		sliceContainer.rotateY(Math.PI * 0.5)
 
 		scene.add(sliceContainer)
 		scene.add(new AmbientLight(0xffffff, this.ambientLightIntensity))
-		scene.add(this.light)
+		scene.add(light)
+		this.resizeObserver.observe(this)
 		console.log('first updated')
+	}
+
+	private onResize() {
+		let { width, height } = this
+		console.log('onresize')
+		if (!width || !height) {
+			const rect = this.getBoundingClientRect()
+			if (!width) width = rect.width
+			if (!height) height = rect.height
+		}
+		width = Math.max(240, width)
+		height = Math.max(180, height)
+		this.actualWidth = width
+		this.actualHeight = height
+	}
+
+	private updateSize() {
+		const { renderer, labelRenderer, composer, camera, shaderPass, outlinePass, actualWidth, actualHeight } = this
+		const { devicePixelRatio } = window
+		camera.aspect = actualWidth / actualHeight
+		camera.updateProjectionMatrix()
+		renderer.setSize(actualWidth, actualHeight)
+		labelRenderer.setSize(actualWidth, actualHeight)
+		composer.setSize(actualWidth, actualHeight)
+		outlinePass.setSize(actualWidth, actualHeight)
+		shaderPass.uniforms.resolution.value.set((1 / actualWidth) * devicePixelRatio, (1 / actualHeight) * devicePixelRatio)
+		this.renderScene()
 	}
 
 	private setupSlices() {
@@ -227,7 +266,7 @@ export class PieChart3d extends LitElement {
 				sliceContainer.add(pieSlice)
 				invisibleSlices.push(pieSlice.invisibleMesh)
 				// slices that are not created during the initial animation should be moved to MAX_ROTATION
-				// to appear from the end of the pie and sized as the existing slices
+				// to appear from the end of the pie and of the same shape as the existing slices
 				if (!this.initialAnimation) {
 					const { innerWidth, outerWidth, thickness } = this.sliceContainer.children[0] as PieSlice
 					Object.assign(pieSlice, { sizeInRadians: 0, innerWidth, outerWidth, thickness })
@@ -244,13 +283,12 @@ export class PieChart3d extends LitElement {
 			const pct = (sizeInRadians / TWO_PI) * 100
 			const slice = sliceContainer.children[index] as PieSlice
 			const z = -(sizeInRadians + current)
-			// slice.hideLabels()
 			slice.userData.animtween = new Tween(slice).to({ sizeInRadians, innerWidth, outerWidth, thickness }, animationDuration).easing(EASE_INOUT).start()
 			slice.userData.rotatetween = new Tween(slice.rotation).to({ z }, animationDuration).easing(EASE_INOUT).start()
 			slice.labelMargin = 0
+			slice.percentMargin = 0
 			slice.setLabelText(key)
-			slice.setPercentText(`<span>${pct.toFixed(1)}%</span>`)
-			console.log('hiding label for anim')
+			slice.setPercentText(`${pct.toFixed(1)}%`)
 			slice.hideLabel()
 			slice.hidePercent()
 			this.labelRenderer.render(this.scene, this.camera)
@@ -262,27 +300,41 @@ export class PieChart3d extends LitElement {
 					.to({ labelMargin }, this.animationDuration / 5)
 					.easing(EASE_OUT)
 					.start()
-				// slice.setPercentText(`<span>${pct.toFixed(1)}%</span>`)
-				setTimeout(() => {
-					// we attempt to mitigate label overlaps by increasing the labelMargin when
-					// a label overlaps with the previous label
-					;(this.sliceContainer.children as PieSlice[]).forEach((child: PieSlice, idx) => {
-						if (idx === 0) return
-						const currentBox = child.labelSpan.getBoundingClientRect()
-						const prevBox = (this.sliceContainer.children[idx - 1] as PieSlice).labelSpan.getBoundingClientRect()
-						if (boxesIntersect(currentBox, prevBox)) {
-							const m = this.labelMargin * 1.7
-							child.userData.labeltween = new Tween(child)
-								.to({ labelMargin: m }, this.animationDuration / 5)
-								.easing(EASE_OUT)
-								.start()
-						}
-					})
-				}, 320)
+
 				this.initialAnimation = false
 			}, animationDuration)
 			current += sizeInRadians
 		})
+		setTimeout(
+			() => {
+				this.cnt = 0
+				this.fixOverlaps('labelSpan')
+				this.fixOverlaps('percentSpan')
+			},
+			this.animationDuration + this.animationDuration / 5,
+		)
+	}
+	private cnt = 0
+	private fixOverlaps(span: 'labelSpan' | 'percentSpan' = 'labelSpan') {
+		// we attempt to mitigate label overlaps by increasing the labelMargin when
+		// a label overlaps with the previous label
+		const children = this.sliceContainer.children as PieSlice[]
+		let hasOverlap = false
+		children.forEach((child, idx) => {
+			if (idx === 0) return
+			const currentBox = child[span].getBoundingClientRect()
+			const prevBox = children[idx - 1][span].getBoundingClientRect()
+			if (boxesIntersect(currentBox, prevBox)) {
+				hasOverlap = true
+				if (span === 'labelSpan') child.labelMargin += 0.07
+				else child.percentMargin += 0.03
+			}
+		})
+		if (hasOverlap && this.cnt < 300) {
+			this.cnt++
+			this.labelRenderer.render(this.scene, this.camera)
+			setTimeout(() => this.fixOverlaps(span), 5)
+		}
 	}
 
 	protected updated(_changedProperties: PropertyValues): void {
@@ -293,7 +345,7 @@ export class PieChart3d extends LitElement {
 			this.updateColors()
 		}
 		if (_changedProperties.has('lightIntensity')) {
-			this.light.intensity = this.lightIntensity
+			this.lightTween.to({ intensity: this.lightIntensity }, this.animationDuration).start()
 		}
 		if (_changedProperties.has('labelMargin')) {
 			const slices = this.sliceContainer.children as PieSlice[]
@@ -318,6 +370,13 @@ export class PieChart3d extends LitElement {
 				slices.forEach((slice) => slice.showPercent())
 			}
 		}
+		if (_changedProperties.has('width') || _changedProperties.has('height')) {
+			if (!this.width || !this.height) return
+			this.resizeTween.to({ actualWidth: this.width, actualHeight: this.height }, this.animationDuration).start()
+		}
+		if (_changedProperties.has('actualWidth') || _changedProperties.has('actualHeight')) {
+			this.updateSize()
+		}
 	}
 
 	private updateColors() {
@@ -341,8 +400,8 @@ export class PieChart3d extends LitElement {
 
 	private onPointerMove(event: MouseEvent) {
 		if (event.offsetX === 0 && event.offsetY === 0) return
-		this.pointer.x = (event.offsetX / this.width) * 2 - 1
-		this.pointer.y = -(event.offsetY / this.height) * 2 + 1
+		this.pointer.x = (event.offsetX / this.actualWidth) * 2 - 1
+		this.pointer.y = -(event.offsetY / this.actualHeight) * 2 + 1
 	}
 
 	private onPointerClick() {
@@ -368,7 +427,7 @@ export class PieChart3d extends LitElement {
 		slice.userData.tween = new Tween(slice.children[0].position).to({ x, y, z }, 700).easing(EASE_OUT).start()
 	}
 
-	private resetSlice(slice: Object3D) {
+	private resetSlice(slice: PieSlice) {
 		slice.userData.tween = new Tween(slice.children[0].position).to({ x: 0, y: 0, z: 0 }, 100).start()
 	}
 
@@ -405,10 +464,12 @@ export class PieChart3d extends LitElement {
 			child.userData.labeltween?.update(time)
 			child.userData.colortween?.update(time)
 		})
+		this.resizeTween.update(time)
+		this.lightTween.update(time)
 		this.renderScene()
 	}
 
 	render() {
-		return html`<div id="main" style="width: ${this.width}px; height: ${this.height}px;"></div>`
+		return html`<div id="main" style="width: ${this.actualWidth}px; height: ${this.actualHeight}px;"></div>`
 	}
 }
