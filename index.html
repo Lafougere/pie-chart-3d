@@ -9,6 +9,7 @@
 		<script type="module">
 			import { html, render } from 'lit'
 			import './src/pie-chart-3d.js'
+			let isHidden = false
 			const COLORS = {
 				red: 0xf44336,
 				blue: 0x2196f3,
@@ -98,14 +99,17 @@
 				document.querySelector('pie-chart-3d').colors = Object.values(COLORS2)
 			}, 3000)
 			render(
-				html`<pie-chart-3d .slices="${slices}" width="640" height="480" animationDuration="1500">
-					<h1>Vite + Lit</h1>
-				</pie-chart-3d>`,
+				html` <button @click="${(e) => e.target.nextElementSibling.nextElementSibling.setAttribute('hidden', '')}">Hide</button
+					><button @click="${(e) => e.target.nextElementSibling.removeAttribute('hidden')}">shown</button>
+					<pie-chart-3d ?hidden="${isHidden}" .slices="${slices}" width="640" height="480" animationDuration="1500">
+						<h1>Vite + Lit</h1>
+					</pie-chart-3d>`,
 				document.getElementById('demo'),
 			)
 		</script>
 	</head>
 	<body>
+		<button @click="() => ">Hide</button>
 		<div id="demo" style="width: 1280px; height: 960px"></div>
 	</body>
 </html>
